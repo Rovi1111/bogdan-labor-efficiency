@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Экономическая оценка целесообразности оплаты труда: отдача ФОТ, опережение производительности над зарплатой, сценарии «что если».">
+  <title>ООО «БОГДАН» — эффективность оплаты труда</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>ООО «БОГДАН»</h1>
+      <p class="subtitle">Оценка целесообразности оплаты труда</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Пояснение -->
+    <section class="panel intro" aria-labelledby="intro-h">
+      <h2 id="intro-h">Что показывает страница</h2>
+      <p>
+        Страница сопоставляет расходы на оплату труда с результатами компании.
+        <strong>Блок 1</strong> показывает, сколько выручки и прибыли приносит каждый рубль фонда оплаты труда (ФОТ).
+        <strong>Блок 2</strong> проверяет главное условие экономически оправданного роста зарплат:
+        производительность труда должна расти быстрее средней заработной платы.
+        <strong>Блок 3</strong> позволяет смоделировать следующий период и найти допустимое повышение зарплаты.
+      </p>
+      <p class="legend-title">Как читать светофор (коэффициент опережения = индекс производительности / индекс средней ЗП):</p>
+      <ul class="traffic-legend">
+        <li><span class="status status-green">🟢 &gt; 1</span> производительность растёт быстрее зарплаты — повышение оправдано.</li>
+        <li><span class="status status-yellow">🟡 0,95–1</span> темпы почти равны — зона внимания.</li>
+        <li><span class="status status-red">🔴 &lt; 0,95</span> зарплата растёт заметно быстрее производительности — рост затрат не окупается.</li>
+      </ul>
+      <p class="muted">Данные вводятся вручную и сохраняются только в этом браузере.</p>
+    </section>
+
+    <!-- Ввод данных -->
+    <section class="panel" aria-labelledby="data-h">
+      <div class="panel-head">
+        <h2 id="data-h">Исходные данные</h2>
+        <div class="btn-row">
+          <button type="button" class="btn" id="btn-reset">Сбросить к примеру</button>
+          <button type="button" class="btn btn-danger" id="btn-clear">Очистить всё</button>
+        </div>
+      </div>
+
+      <div id="example-note" class="note" hidden>
+        Таблица заполнена <strong>условным примером</strong>. Замените значения своими или нажмите «Очистить всё».
+      </div>
+
+      <div class="settings">
+        <label class="field">
+          <span>Тип периода</span>
+          <select id="period-type">
+            <option value="month">Месяц</option>
+            <option value="quarter">Квартал</option>
+            <option value="year">Год</option>
+          </select>
+        </label>
+        <div class="field field-inline">
+          <label class="check">
+            <input type="checkbox" id="ins-enabled">
+            <span>Учитывать страховые взносы</span>
+          </label>
+          <label class="inline-num">
+            <span class="sr-only">Ставка страховых взносов, %</span>
+            <input type="text" inputmode="decimal" id="ins-rate" class="num" size="5">
+            <span>%</span>
+          </label>
+          <button type="button" class="tip" data-tip="insurance" aria-label="Пояснение">?</button>
+        </div>
+        <label class="field">
+          <span>Отраслевой ориентир выручки на 1 ₽ ФОТ
+            <button type="button" class="tip" data-tip="benchmark" aria-label="Пояснение">?</button>
+          </span>
+          <input type="text" inputmode="decimal" id="benchmark" class="num" placeholder="необязательно, напр. 4,5">
+        </label>
+      </div>
+
+      <div class="table-scroll">
+        <table class="data-table input-table" id="input-table">
+          <thead>
+            <tr>
+              <th scope="col">Период</th>
+              <th scope="col" class="r">Выручка, ₽</th>
+              <th scope="col" class="r">Прибыль, ₽</th>
+              <th scope="col" class="r">ФОТ, ₽</th>
+              <th scope="col" class="r">Численность, чел.</th>
+              <th scope="col"><span class="sr-only">Действия</span></th>
+            </tr>
+          </thead>
+          <tbody id="input-body"></tbody>
+        </table>
+      </div>
+      <div class="btn-row table-actions">
+        <button type="button" class="btn btn-primary" id="btn-add">+ Добавить период</button>
+        <span id="input-error" class="error-text" role="status"></span>
+      </div>
+      <p class="muted small">Выручка, ФОТ ≥ 0; прибыль может быть отрицательной; численность &gt; 0. Разделители разрядов и запятая допускаются.</p>
+    </section>
+
+    <!-- Блок 1 -->
+    <section class="panel" aria-labelledby="b1-h">
+      <h2 id="b1-h"><span class="block-num">1</span> Отдача ФОТ</h2>
+      <p class="muted" id="b1-caption"></p>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="chart-box"><canvas id="chart-fot" aria-label="Динамика отдачи ФОТ" role="img"></canvas></div>
+    </section>
+
+    <!-- Блок 2 -->
+    <section class="panel" aria-labelledby="b2-h">
+      <h2 id="b2-h"><span class="block-num">2</span> Опережение производительности над зарплатой</h2>
+      <div class="table-scroll">
+        <table class="data-table" id="lead-table">
+          <thead>
+            <tr>
+              <th scope="col">Период</th>
+              <th scope="col" class="r">Производительность, ₽/чел. <button type="button" class="tip" data-tip="productivity" aria-label="Пояснение">?</button></th>
+              <th scope="col" class="r">Средняя ЗП, ₽ <button type="button" class="tip" data-tip="avgWage" aria-label="Пояснение">?</button></th>
+              <th scope="col" class="r">Iпт <button type="button" class="tip" data-tip="ipt" aria-label="Пояснение">?</button></th>
+              <th scope="col" class="r">Iзп <button type="button" class="tip" data-tip="izp" aria-label="Пояснение">?</button></th>
+              <th scope="col" class="r">К опережения <button type="button" class="tip" data-tip="lead" aria-label="Пояснение">?</button></th>
+              <th scope="col">Статус</th>
+            </tr>
+          </thead>
+          <tbody id="lead-body"></tbody>
+        </table>
+      </div>
+      <div class="chart-box"><canvas id="chart-lead" aria-label="Индексы производительности и зарплаты" role="img"></canvas></div>
+      <div class="summary" id="lead-summary" aria-live="polite"></div>
+    </section>
+
+    <!-- Блок 3 -->
+    <section class="panel" aria-labelledby="b3-h">
+      <h2 id="b3-h"><span class="block-num">3</span> Сценарии «что если»</h2>
+      <p class="muted" id="b3-caption"></p>
+      <div class="scenario-grid">
+        <div class="sliders">
+          <div class="slider">
+            <label for="s-wage">Рост средней зарплаты</label>
+            <output id="o-wage" for="s-wage"></output>
+            <input type="range" id="s-wage" min="-20" max="50" step="0.5">
+          </div>
+          <div class="slider">
+            <label for="s-headcount">Изменение численности</label>
+            <output id="o-headcount" for="s-headcount"></output>
+            <input type="range" id="s-headcount" min="-30" max="50" step="0.5">
+          </div>
+          <div class="slider">
+            <label for="s-revenue">Рост выручки</label>
+            <output id="o-revenue" for="s-revenue"></output>
+            <input type="range" id="s-revenue" min="-50" max="100" step="0.5">
+          </div>
+          <label class="field">
+            <span>Маржинальность, %
+              <button type="button" class="tip" data-tip="margin" aria-label="Пояснение">?</button>
+            </span>
+            <input type="text" inputmode="decimal" id="s-margin" class="num">
+          </label>
+          <button type="button" class="btn" id="btn-scn-reset">Обнулить сценарий</button>
+        </div>
+
+        <div class="scenario-result">
+          <div class="scenario-status" id="scn-status"></div>
+          <div class="hint-box" id="scn-hint"></div>
+          <div class="table-scroll">
+            <table class="data-table compare-table">
+              <thead>
+                <tr>
+                  <th scope="col">Показатель</th>
+                  <th scope="col" class="r">Факт</th>
+                  <th scope="col" class="r">Сценарий</th>
+                  <th scope="col" class="r">Разница</th>
+                </tr>
+              </thead>
+              <tbody id="compare-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap muted small">
+      ООО «БОГДАН» · Инструмент оценки эффективности оплаты труда. Расчёты выполняются в браузере, данные никуда не передаются.
+    </div>
+  </footer>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="./js/calc.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
