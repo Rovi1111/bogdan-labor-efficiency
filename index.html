@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="Экономическая оценка целесообразности оплаты труда: отдача ФОТ и опережение производительности над зарплатой.">
+  <meta name="description" content="Оценка отдачи фонда оплаты труда: выручка и прибыль на 1 ₽ ФОТ, доля ФОТ в выручке.">
   <title>ООО «БОГДАН» — эффективность оплаты труда</title>
   <link rel="stylesheet" href="./css/styles.css">
 </head>
@@ -13,100 +13,53 @@
     <div class="wrap">
       <h1>ООО «БОГДАН»</h1>
       <p class="subtitle">Оценка целесообразности оплаты труда</p>
-      <nav class="tabs" role="tablist" aria-label="Раздел">
-        <a href="#fot" role="tab" id="tab-fot" aria-controls="page-fot">Отдача ФОТ</a>
-        <a href="#lead" role="tab" id="tab-lead" aria-controls="page-lead">Производительность и зарплата</a>
-      </nav>
     </div>
   </header>
 
   <main class="wrap">
-    <!-- Страница 1. Отдача ФОТ -->
-    <section class="page" id="page-fot" role="tabpanel" aria-labelledby="tab-fot">
-      <p class="lead-text">Сколько выручки и прибыли приносит каждый рубль фонда оплаты труда (ФОТ).</p>
+    <section class="page" aria-labelledby="page-h">
+      <h2 id="page-h" class="sr-only">Отдача ФОТ</h2>
+      <p class="lead-text">Сколько выручки и прибыли приносит каждый рубль фонда оплаты труда (ФОТ). Передвиньте ползунки — показатели и график пересчитаются сразу.</p>
       <div class="layout">
         <div class="controls">
           <div class="slider">
             <label for="f-revenue">Выручка за период</label>
-            <output id="o-revenue"></output>
+            <output id="o-revenue" for="f-revenue"></output>
             <input type="range" id="f-revenue" min="0" max="200" step="0.5" value="64">
           </div>
           <div class="slider">
             <label for="f-fot">ФОТ за период</label>
-            <output id="o-fot"></output>
+            <output id="o-fot" for="f-fot"></output>
             <input type="range" id="f-fot" min="0" max="60" step="0.1" value="13.3">
           </div>
           <div class="slider">
             <label for="f-profit">Прибыль за период</label>
-            <output id="o-profit"></output>
+            <output id="o-profit" for="f-profit"></output>
             <input type="range" id="f-profit" min="-20" max="40" step="0.1" value="4.8">
           </div>
+          <p class="warning" id="warning" role="status" hidden></p>
         </div>
         <div class="kpis">
           <div class="kpi">
             <div class="kpi-label">Выручка на 1 ₽ ФОТ</div>
             <div class="kpi-value" id="k-rev"></div>
-            <div class="kpi-note">Выручка / ФОТ</div>
+            <div class="kpi-note" id="n-rev"></div>
           </div>
           <div class="kpi">
             <div class="kpi-label">Прибыль на 1 ₽ ФОТ</div>
             <div class="kpi-value" id="k-profit"></div>
-            <div class="kpi-note">Прибыль / ФОТ</div>
+            <div class="kpi-note" id="n-profit"></div>
           </div>
           <div class="kpi">
             <div class="kpi-label">Доля ФОТ в выручке</div>
             <div class="kpi-value" id="k-share"></div>
-            <div class="kpi-note">ФОТ / Выручка × 100 %</div>
+            <div class="kpi-note" id="n-share"></div>
           </div>
         </div>
       </div>
       <h2 class="chart-title">Как изменится отдача при другом ФОТ</h2>
       <p class="muted small">Выручка и прочие расходы неизменны: каждый дополнительный рубль ФОТ уменьшает прибыль на рубль. Ромб — текущее значение.</p>
-      <div class="chart-box"><canvas id="chart-fot" role="img" aria-label="Отдача ФОТ в зависимости от размера ФОТ"></canvas></div>
-    </section>
-
-    <!-- Страница 2. Опережение производительности над зарплатой -->
-    <section class="page" id="page-lead" role="tabpanel" aria-labelledby="tab-lead" hidden>
-      <p class="lead-text">Повышение зарплаты экономически оправдано, если производительность труда растёт быстрее средней зарплаты.</p>
-      <div class="layout">
-        <div class="controls">
-          <div class="slider">
-            <label for="l-revenue">Рост выручки</label>
-            <output id="o-l-revenue"></output>
-            <input type="range" id="l-revenue" min="-50" max="100" step="0.5" value="8">
-          </div>
-          <div class="slider">
-            <label for="l-headcount">Изменение численности</label>
-            <output id="o-l-headcount"></output>
-            <input type="range" id="l-headcount" min="-30" max="50" step="0.5" value="2">
-          </div>
-          <div class="slider">
-            <label for="l-wage">Рост средней зарплаты</label>
-            <output id="o-l-wage"></output>
-            <input type="range" id="l-wage" min="-20" max="50" step="0.5" value="10">
-          </div>
-        </div>
-        <div class="kpis">
-          <div class="kpi">
-            <div class="kpi-label">Коэффициент опережения</div>
-            <div class="kpi-value"><span id="k-lead"></span> <span id="k-status"></span></div>
-            <div class="kpi-note">Iпт <span id="k-ipt"></span> / Iзп <span id="k-izp"></span></div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Допустимое повышение ЗП</div>
-            <div class="kpi-value" id="k-max"></div>
-            <div class="kpi-note" id="k-max-note"></div>
-          </div>
-        </div>
-      </div>
-      <p class="legend-line small">
-        <span class="status status-green">🟢 &gt; 1</span> оправдано
-        <span class="status status-yellow">🟡 0,95–1</span> внимание
-        <span class="status status-red">🔴 &lt; 0,95</span> рост ЗП не окупается
-      </p>
-      <h2 class="chart-title">Коэффициент опережения при разном росте зарплаты</h2>
-      <p class="muted small">При выбранных росте выручки и изменении численности. Ромб — выбранный рост ЗП.</p>
-      <div class="chart-box"><canvas id="chart-lead" role="img" aria-label="Коэффициент опережения в зависимости от роста зарплаты"></canvas></div>
+      <div class="chart-box"><canvas id="chart-fot" role="img" aria-label="Выручка и прибыль на 1 ₽ ФОТ в зависимости от размера ФОТ"></canvas></div>
     </section>
   </main>
 

@@ -34,38 +34,18 @@
   }
 
   /**
-   * Опережение производительности над зарплатой (все входы — в процентах).
-   * Iпт = (1 + рост выручки) / (1 + изменение численности)
-   * Iзп = 1 + рост средней ЗП
-   * К   = Iпт / Iзп
+   * Прочие расходы (всё, кроме ФОТ) = Выручка − ФОТ − Прибыль.
+   * Отрицательное значение означает, что введённые числа не согласуются друг с другом.
    */
-  function leadIndices(revenuePct, headcountPct, wagePct) {
-    const ipt = safeDiv(1 + revenuePct / 100, 1 + headcountPct / 100);
-    const izp = 1 + wagePct / 100;
-    return { ipt: ipt, izp: izp, lead: ipt == null ? null : safeDiv(ipt, izp) };
-  }
-
-  /** Светофор: 'green' (К > 1), 'yellow' (0,95–1), 'red' (< 0,95). */
-  function leadStatus(lead) {
-    if (lead == null) return null;
-    if (lead > 1) return 'green';
-    if (lead >= 0.95) return 'yellow';
-    return 'red';
-  }
-
-  /** Максимальный рост средней ЗП (в %), при котором К ≥ 1: (1 + ΔВ) / (1 + ΔЧ) − 1. */
-  function maxWageGrowth(revenuePct, headcountPct) {
-    const ipt = safeDiv(1 + revenuePct / 100, 1 + headcountPct / 100);
-    return ipt == null ? null : (ipt - 1) * 100;
+  function otherCosts(revenue, fot, profit) {
+    return revenue - fot - profit;
   }
 
   const Calc = {
     safeDiv: safeDiv,
     fotReturn: fotReturn,
     profitAtFot: profitAtFot,
-    leadIndices: leadIndices,
-    leadStatus: leadStatus,
-    maxWageGrowth: maxWageGrowth,
+    otherCosts: otherCosts,
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Calc;
