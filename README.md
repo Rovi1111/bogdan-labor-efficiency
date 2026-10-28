@@ -3,7 +3,7 @@
 Простое веб-приложение для оценки отдачи фонда оплаты труда (ФОТ): три ползунка, три показателя и один график.
 Статический сайт без сборки: HTML + CSS + vanilla JS, графики — Chart.js (cdnjs).
 
-**Опубликованная страница:** https://&lt;user&gt;.github.io/bogdan-labor-efficiency/ <!-- заменить после включения GitHub Pages -->
+**Опубликованная страница:** https://rovi1111.github.io/bogdan-labor-efficiency/
 
 ## Показатели
 
